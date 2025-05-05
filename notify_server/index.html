@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Document</title>
+</head>
+<body>
+<h1>SSE测试</h1>
+<script lang="javascript">
+    var source = new EventSource("/events")
+    source.onmessage = function (event) {
+        console.log(event.data);
+    }
+</script>
+</body>
+</html>

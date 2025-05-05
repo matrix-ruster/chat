@@ -37,4 +37,9 @@ cargo add serde-yaml
 # tracing
 cargo add tracing
 cargo add tracing-subscriber --features env-filter
+
+# sse
+cargo add axum-extra -p notify_server --features typed-header
+cargo add futures -p notify_server
+cargo add tokio_stream -p notify_server
 ```
