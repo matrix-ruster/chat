@@ -30,7 +30,9 @@ cargo add anyhow
 # thiserror
 cargo add thiserror
 # sqlx postgres
-cargo add sqlx --features postgres --features runtime-tokio-rustls
+cargo add sqlx --features postgres --features runtime-tokio-rustls --features chrono
+# sqlx 工具
+cargo install sqlx-cli
 # serde
 cargo add serde --features derive
 cargo add serde-yaml
@@ -42,4 +44,19 @@ cargo add tracing-subscriber --features env-filter
 cargo add axum-extra -p notify_server --features typed-header
 cargo add futures -p notify_server
 cargo add tokio_stream -p notify_server
+
+## 时间处理
+cargo add chrono --features serde -p chat_server
+
+## 哈希处理,std实现了 error trait 可以使用thiserror直接 from转化
+cargo add argon2 --features std -p chat_server
+```
+
+创建migration
+
+```shell
+# 生成migrate的sql
+sqlx migrate add initial
+# 执行migrate，记得在.env添加 DATABASE_URL
+sqlx migrate run
 ```

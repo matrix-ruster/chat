@@ -16,7 +16,7 @@ pub struct ServerConfig {
 impl AppConfig {
     pub fn load() -> Result<Self> {
         let ret: Result<AppConfig> = match (
-            File::open("../app.yaml"),
+            File::open("./app.yaml"),
             File::open("/etc/config/app.yaml"),
             env::var("CONFIG_PATH"),
         ) {

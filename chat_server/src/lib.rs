@@ -1,5 +1,7 @@
 mod config;
+mod error;
 mod handlers;
+mod models;
 
 use crate::handlers::{
     create_chat_handler, delete_chat_handler, list_chat_handler, list_message_handler,
@@ -10,6 +12,7 @@ use axum::response::IntoResponse;
 use axum::routing::{get, patch, post};
 use axum::Router;
 pub use config::AppConfig;
+pub use models::User;
 use std::ops::Deref;
 use std::sync::Arc;
 
