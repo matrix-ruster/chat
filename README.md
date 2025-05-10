@@ -60,3 +60,23 @@ sqlx migrate add initial
 # 执行migrate，记得在.env添加 DATABASE_URL
 sqlx migrate run
 ```
+
+用户认证：
+
+- Auth
+  授权
+  jwt-token
+
+```shell
+# jwt-simple = { version = "0.12.12", default-features = false, features = ["pure-rust"] }
+cargo add jwt-simple --features pure-rust -p chat_server
+# 先不使用这个
+cargo add jsonwebtoken -p chat_server
+```
+
+- Permission
+  权限
+- Account
+  账号系统
+- Activity
+  用户行为

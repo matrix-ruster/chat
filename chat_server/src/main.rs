@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chat_server::{get_router, AppConfig};
+use chat_server::{try_init_router, AppConfig};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tracing::level_filters::LevelFilter;
@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     info!("listening on {}", addr);
     let listener = TcpListener::bind(addr).await?;
     // 注册router
-    let app = get_router(config);
+    let app = try_init_router(config).await?;
     // 开启axum服务
     if let Err(e) = axum::serve::serve(listener, app.into_make_service()).await {
         warn!("server error: {}", e);

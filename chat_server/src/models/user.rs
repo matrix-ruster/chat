@@ -1,8 +1,35 @@
 use crate::error::AppError;
-use crate::User;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use chrono::{DateTime, Utc};
+use jwt_simple::prelude::{Deserialize, Serialize};
+use sqlx::FromRow;
+
+#[derive(Serialize, Deserialize, Debug, Clone, FromRow, Default)]
+#[sqlx(default)]
+pub struct User {
+    pub id: i64,
+    pub username: String,
+    pub nickname: String,
+    #[serde(skip)]
+    pub password: String,
+    pub email: String,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CreateUser {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SignUser {
+    pub email: String,
+    pub password: String,
+}
 
 impl User {
     /// 根据email获取用户
@@ -15,18 +42,13 @@ impl User {
     }
 
     /// 添加用户
-    pub async fn create(
-        username: &str,
-        email: &str,
-        password: &str,
-        pool: &sqlx::PgPool,
-    ) -> Result<User, AppError> {
-        let password_hash = hash_password(password)?;
+    pub async fn create(user_info: &CreateUser, pool: &sqlx::PgPool) -> Result<User, AppError> {
+        let password_hash = hash_password(&user_info.password)?;
         let user = sqlx::query_as::<_, User>(
             "insert into users (username, email, password) values ($1,$2,$3) returning id, username, nickname, email, password, created_at",
         )
-        .bind(username)
-        .bind(email)
+        .bind(&user_info.username)
+        .bind(&user_info.email)
         .bind(password_hash)
         .fetch_one(pool)
         .await?;
@@ -34,17 +56,18 @@ impl User {
     }
 
     /// 验证email和password
-    pub async fn verify(
-        email: &str,
-        password: &str,
-        pool: &sqlx::PgPool,
-    ) -> Result<bool, AppError> {
+    pub async fn verify(sign_info: &SignUser, pool: &sqlx::PgPool) -> Result<User, AppError> {
         let user_info =
             sqlx::query_as::<_, User>("select email,password from users where email = $1")
-                .bind(email)
+                .bind(&sign_info.email)
                 .fetch_one(pool)
                 .await?;
-        verify_password(password, &*user_info.password)
+        let is_match = verify_password(&sign_info.password, &*user_info.password)?;
+        if is_match {
+            Ok(user_info)
+        } else {
+            Err(AppError::PasswordWrongError)
+        }
     }
 }
 
@@ -87,12 +110,27 @@ mod tests {
     #[sqlx::test]
     async fn create_user_and_verify_test() -> sqlx::Result<(), AppError> {
         let pool = create_pool().await?;
-        let u = User::create("johnsonsmile", "johnsonsmile@163.com", "123456", &pool).await?;
+        let u = User::create(
+            &CreateUser {
+                username: "johnsonsmile".to_string(),
+                email: "johnsonsmile@163.com".to_string(),
+                password: "123456".to_string(),
+            },
+            &pool,
+        )
+        .await?;
         assert_eq!(u.username, "johnsonsmile");
         dbg!("user: {:#?}", &u);
-        let is_match = User::verify("johnsonsmile@163.com", "123456", &pool).await?;
-        assert!(is_match);
-        dbg!("is_match: {:#?}", is_match);
+        let user = User::verify(
+            &SignUser {
+                email: "johnsonsmile@163.com".to_string(),
+                password: "123456".to_string(),
+            },
+            &pool,
+        )
+        .await?;
+        dbg!("user: {:#?}", &user);
+        assert_eq!(user.email, u.email);
         let res = sqlx::query("delete from users where username = $1")
             .bind(u.username)
             .execute(&pool)

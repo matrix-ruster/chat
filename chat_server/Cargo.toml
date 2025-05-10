@@ -9,6 +9,8 @@ argon2 = { workspace = true, features = ["std"] }
 axum = { workspace = true }
 chrono = { workspace = true }
 dotenvy = "0.15.7"
+jsonwebtoken = "9.3.1"
+jwt-simple = { workspace = true }
 serde = { workspace = true }
 serde_yaml = { workspace = true }
 sqlx = { workspace = true }

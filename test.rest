@@ -1,4 +1,28 @@
+## auth signup api
+POST http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "email": "johnsonsmile@163.com",
+  "username": "johnsonsmile",
+  "password": "123456"
+}
+
+###
+
+## auth signin api
+POST http://localhost:8080/api/signin
+Content-Type: application/json
+
+{
+  "email": "johnsonsmile@163.com",
+  "password": "123456"
+}
+
+###
 ## chat api
 GET http://localhost:8080/api/chat
+
+###
 
 
